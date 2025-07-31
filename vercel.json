@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "buildCommand": "next build",
+  "devCommand": "next dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "outputDirectory": ".next",
+  "env": {
+    "NEXT_PUBLIC_BASE_URL": {
+      "description": "The base URL of the application. Will be automatically set by Vercel."
+    },
+    "MONGODB_URI": {
+      "description": "MongoDB connection string"
+    },
+    "JWT_SECRET": {
+      "description": "Secret key for signing JWT tokens"
+    }
+  }
+}

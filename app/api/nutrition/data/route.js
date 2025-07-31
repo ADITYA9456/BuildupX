@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { connectDB } from '@/lib/mongodb';
+import { connectDB } from '../../../../lib/db';
 import Meal from '../../../../models/Meal';
 import { getMonthlyAverages, getWeeklyAverages, summarizeMealsByDay } from './helpers';
               date: new Date().toISOString().split('T')[0],

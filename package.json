@@ -19,6 +19,7 @@
     "mongodb": "^6.18.0",
     "mongoose": "^8.16.5",
     "next": "15.3.4",
+    "next-auth": "^4.24.11",
     "razorpay": "^2.9.6",
     "react": "^19.0.0",
     "react-chartjs-2": "^5.2.0",

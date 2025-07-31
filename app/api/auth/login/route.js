@@ -1,8 +1,8 @@
+import { connectDB } from '@/lib/mongodb';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { connectDB } from '../../../../lib/db';
 import User from '../../../../models/User';
 
 // Use a simpler auth system with JWT tokens directly

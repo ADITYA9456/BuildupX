@@ -9,7 +9,7 @@ export async function GET() {
   try {
     // Get the token from cookies
     const cookieStore = cookies();
-    const token = cookieStore.get('token')?.value;
+    const token = cookieStore.get('auth-token')?.value;
     
     if (!token) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
@@ -18,12 +18,12 @@ export async function GET() {
     // Verify the token
     let decoded;
     try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET);
+      decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-jwt-secret');
     } catch (error) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
     
-    const userId = decoded.userId;
+    const userId = decoded.id;
     
     // Connect to the database
     await connectDB();

@@ -1,4 +1,4 @@
-import { connectDB } from '@/lib/db';
+import { connectDB } from '@/lib/mongodb';
 import FoodLibrary from '@/models/FoodLibrary';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextResponse } from 'next/server';

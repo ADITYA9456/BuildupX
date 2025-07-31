@@ -1,4 +1,4 @@
-import { connectDB } from '@/lib/db';
+import { connectDB } from '@/lib/mongodb';
 import { FoodLibrary } from '@/models/FoodLibrary';
 import { User } from '@/models/User';
 import { NextResponse } from 'next/server';
@@ -58,7 +58,7 @@ export async function GET() {
     
     // Check API endpoints by pinging them
     const apiChecks = [
-      { name: 'food', path: '/api/food/search?query=rice' },
+      { name: 'foods', path: '/api/foods/search?q=rice' },
       { name: 'meal', path: '/api/meal' },
       { name: 'user', path: '/api/user/create' },
       { name: 'auth', path: '/api/auth/csrf' },

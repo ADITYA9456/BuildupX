@@ -1,4 +1,4 @@
-import { connectDB } from '@/lib/db';
+import { connectDB } from '@/lib/mongodb';
 import Payment from '@/models/Payment';
 import User from '@/models/User';
 

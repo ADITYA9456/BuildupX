@@ -1,5 +1,5 @@
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { connectDB } from '@/lib/db';
+import { connectDB } from '@/lib/mongodb';
 import { Meal } from '@/models/Meal';
 import { getServerSession } from 'next-auth/next';
 import { NextResponse } from 'next/server';

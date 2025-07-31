@@ -1,4 +1,4 @@
-import { connectDB } from '@/lib/db';
+import { connectDB } from '@/lib/mongodb';
 import { Meal } from '@/models/Meal';
 import jwt from 'jsonwebtoken';
 import { cookies } from 'next/headers';

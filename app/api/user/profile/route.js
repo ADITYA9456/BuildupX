@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import User from '../../../../models/User';
+import UserProfile from '../../../../models/UserProfile';
 
 // API endpoint to get user profile data
 export async function GET() {
@@ -14,12 +15,8 @@ export async function GET() {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
     
-    try {
-      await connectDB();
-    } catch (dbError) {
-      console.error('Database connection error:', dbError);
-      // Continue without database connection - we'll return mock data
-    }
+    // Connect to database
+    await connectDB();
     
     // Verify the token
     try {
@@ -30,21 +27,31 @@ export async function GET() {
         const user = await User.findById(decoded.id).select('-password -salt');
         
         if (user) {
-          // Return real profile data
+          // Try to get the separate UserProfile document if it exists
+          const userProfile = await UserProfile.findOne({ userId: user._id }).sort({ createdAt: -1 });
+          
+          // Combine user data with profile data (prioritize separate profile if exists)
+          const profileData = {
+            name: user.name,
+            email: user.email,
+            membership: user.membership?.plan || 'STANDARD',
+            profile: {
+              // Use dedicated UserProfile data if available, otherwise fall back to User.profile
+              height: userProfile?.height || user.profile?.height || null,
+              weight: userProfile?.weight || user.profile?.weight || null,
+              age: userProfile?.age || user.profile?.age || null,
+              gender: userProfile?.gender || user.profile?.gender || 'male',
+              goal: userProfile?.goal || user.profile?.goal || 'maintain',
+              activityLevel: userProfile?.activityLevel || 'moderate'
+            }
+          };
+          
+          console.log('Sending profile data:', profileData);
+          
+          // Return combined profile data
           return NextResponse.json({
             success: true,
-            profile: {
-              name: user.name,
-              email: user.email,
-              membership: user.membership?.plan || 'STANDARD',
-              profile: {
-                height: user.profile?.height || null,
-                weight: user.profile?.weight || null,
-                age: user.profile?.age || null,
-                gender: user.profile?.gender || 'male',
-                goal: user.profile?.goal || 'maintain'
-              }
-            }
+            profile: profileData
           });
         }
       } catch (dbError) {

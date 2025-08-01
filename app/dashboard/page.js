@@ -14,7 +14,7 @@ export default function Dashboard() {
   const { user, loading, logout } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
-  const [nutritionPeriod, setNutritionPeriod] = useState('daily');
+  const [nutritionPeriod, setNutritionPeriod] = useState('weekly');
   const [nutritionData, setNutritionData] = useState({
     daily: { 
       meals: [],
@@ -27,7 +27,8 @@ export default function Dashboard() {
       }
     },
     weekly: { days: [] },
-    monthly: { days: [] }
+    monthly: { days: [] },
+    yearly: { months: [] }
   });
   
   // Direct access to daily nutrition values for UI responsiveness
@@ -60,7 +61,8 @@ export default function Dashboard() {
           setNutritionData({
             daily: event.detail.daily || { meals: [] },
             weekly: event.detail.weekly || { days: [] },
-            monthly: event.detail.monthly || { days: [] }
+            monthly: event.detail.monthly || { days: [] },
+            yearly: event.detail.yearly || { months: [] }
           });
         }
       };
@@ -77,15 +79,28 @@ export default function Dashboard() {
   
   const fetchProfileData = async () => {
     try {
+      console.log('Fetching user profile data...');
       const response = await fetch('/api/user/profile');
-      if (!response.ok) throw new Error('Failed to fetch profile');
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('Profile API error:', response.status, errorData);
+        throw new Error(`Failed to fetch profile: ${response.status} - ${errorData.error || 'Unknown error'}`);
+      }
+      
       const data = await response.json();
-      setProfileData(data.profile);
+      console.log('Profile data received:', data);
+      
+      if (data && data.profile) {
+        setProfileData(data.profile);
+      } else {
+        console.warn('Profile data is missing or empty');
+      }
     } catch (error) {
       console.error('Error fetching profile:', error);
       setToast({
         show: true,
-        message: 'Failed to load profile data',
+        message: 'Failed to load profile data: ' + error.message,
         type: 'error'
       });
     }
@@ -120,7 +135,8 @@ export default function Dashboard() {
       setNutritionData({
         daily: dailyData,
         weekly: data.data.weekly || { days: [] },
-        monthly: data.data.monthly || { days: [] }
+        monthly: data.data.monthly || { days: [] },
+        yearly: data.data.yearly || { months: [] }
       });
       
       // Calculate and set daily totals separately for immediate UI update
@@ -171,7 +187,8 @@ export default function Dashboard() {
       setNutritionData({
         daily: { meals: [] },
         weekly: { days: [] },
-        monthly: { days: [] }
+        monthly: { days: [] },
+        yearly: { months: [] }
       });
       
       // Reset daily intake
@@ -503,16 +520,6 @@ export default function Dashboard() {
                 
                 <div className="flex items-center space-x-2">
                   <button
-                    onClick={() => setNutritionPeriod('daily')}
-                    className={`px-3 py-1 rounded-md text-sm ${
-                      nutritionPeriod === 'daily'
-                        ? 'bg-green-500 text-white'
-                        : 'bg-gray-700 text-gray-300'
-                    }`}
-                  >
-                    Daily
-                  </button>
-                  <button
                     onClick={() => setNutritionPeriod('weekly')}
                     className={`px-3 py-1 rounded-md text-sm ${
                       nutritionPeriod === 'weekly'
@@ -532,6 +539,16 @@ export default function Dashboard() {
                   >
                     Monthly
                   </button>
+                  <button
+                    onClick={() => setNutritionPeriod('yearly')}
+                    className={`px-3 py-1 rounded-md text-sm ${
+                      nutritionPeriod === 'yearly'
+                        ? 'bg-green-500 text-white'
+                        : 'bg-gray-700 text-gray-300'
+                    }`}
+                  >
+                    Yearly
+                  </button>
                 </div>
               </div>
               
@@ -540,6 +557,7 @@ export default function Dashboard() {
                   dailyData={nutritionData.daily}
                   weeklyData={nutritionData.weekly}
                   monthlyData={nutritionData.monthly}
+                  yearlyData={nutritionData.yearly}
                   period={nutritionPeriod}
                 />
               </div>

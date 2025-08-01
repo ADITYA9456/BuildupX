@@ -3,7 +3,7 @@
 import Chart from 'chart.js/auto';
 import { useEffect, useRef } from 'react';
 
-export default function NutritionChart({ dailyData, weeklyData, monthlyData, period = 'daily' }) {
+export default function NutritionChart({ dailyData, weeklyData, monthlyData, yearlyData, period = 'weekly' }) {
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
   
@@ -18,15 +18,38 @@ export default function NutritionChart({ dailyData, weeklyData, monthlyData, per
     if (period === 'monthly' && (!monthlyData?.days || monthlyData.days.length === 0)) {
       return true;
     }
+    if (period === 'yearly') {
+      // Check if yearly data exists, otherwise fall back to monthly data
+      if (yearlyData && yearlyData.months && yearlyData.months.length > 0) {
+        return false;
+      } else {
+        // Fall back to monthly data if no specific yearly data
+        return (!monthlyData?.days || monthlyData.days.length === 0);
+      }
+    }
     return false;
   };
 
   const prepareData = (data) => {
     // If no data or empty data, return empty datasets
-    if (!data || (data.meals && data.meals.length === 0) || (data.days && data.days.length === 0)) {
-      const emptyLabels = period === 'daily' 
-        ? ['Breakfast', 'Lunch', 'Dinner', 'Snacks'] 
-        : ['No data'];
+    if (!data || 
+        (data.meals && data.meals.length === 0) || 
+        (data.days && data.days.length === 0) ||
+        (data.months && data.months.length === 0)) {
+      
+      // Generate appropriate labels based on period
+      let emptyLabels;
+      if (period === 'daily') {
+        emptyLabels = ['Breakfast', 'Lunch', 'Dinner', 'Snacks']; 
+      } else if (period === 'weekly') {
+        emptyLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      } else if (period === 'monthly') {
+        emptyLabels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+      } else if (period === 'yearly') {
+        emptyLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      } else {
+        emptyLabels = ['No data'];
+      }
       
       return {
         labels: emptyLabels,
@@ -71,18 +94,46 @@ export default function NutritionChart({ dailyData, weeklyData, monthlyData, per
         fiberData: labels.map(label => mealTotals[label.toLowerCase()]?.fiber || 0)
       };
     } 
-    // If viewing weekly/monthly, show day-by-day breakdown
+    // If viewing weekly/monthly/yearly, use the pre-calculated data from our API
     else {
       const result = {
         labels: [],
         caloriesData: [],
         proteinData: [],
         carbsData: [],
-        fatData: []
+        fatData: [],
+        fiberData: []
       };
       
-      // For weekly: group by day name
-      if (period === 'weekly') {
+      // For weekly: use weeklyData
+      if (period === 'weekly' && data.averages) {
+        result.labels = data.averages.labels || ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        result.caloriesData = data.averages.calories || [0, 0, 0, 0, 0, 0, 0];
+        result.proteinData = data.averages.protein || [0, 0, 0, 0, 0, 0, 0];
+        result.carbsData = data.averages.carbs || [0, 0, 0, 0, 0, 0, 0];
+        result.fatData = data.averages.fat || [0, 0, 0, 0, 0, 0, 0];
+        result.fiberData = data.averages.fiber || [0, 0, 0, 0, 0, 0, 0];
+      } 
+      // For monthly: use monthlyData
+      else if (period === 'monthly' && data.averages) {
+        result.labels = data.averages.labels || ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+        result.caloriesData = data.averages.calories || [0, 0, 0, 0];
+        result.proteinData = data.averages.protein || [0, 0, 0, 0];
+        result.carbsData = data.averages.carbs || [0, 0, 0, 0];
+        result.fatData = data.averages.fat || [0, 0, 0, 0];
+        result.fiberData = data.averages.fiber || [0, 0, 0, 0];
+      }
+      // For yearly: use yearlyData
+      else if (period === 'yearly' && data.averages) {
+        result.labels = data.averages.labels || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        result.caloriesData = data.averages.calories || Array(12).fill(0);
+        result.proteinData = data.averages.protein || Array(12).fill(0);
+        result.carbsData = data.averages.carbs || Array(12).fill(0);
+        result.fatData = data.averages.fat || Array(12).fill(0);
+        result.fiberData = data.averages.fiber || Array(12).fill(0);
+      }
+      // Fallback to handling raw day data if averages aren't available
+      else if (data.days && data.days.length > 0) {
         const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         result.labels = days;
         
@@ -116,7 +167,7 @@ export default function NutritionChart({ dailyData, weeklyData, monthlyData, per
         result.fiberData = days.map(day => dayTotals[day]?.fiber || 0);
       } 
       // For monthly: group by date
-      else {
+      else if (period === 'monthly') {
         // Sort days by date
         const sortedDays = [...data.days].sort((a, b) => new Date(a.date) - new Date(b.date));
         
@@ -127,6 +178,44 @@ export default function NutritionChart({ dailyData, weeklyData, monthlyData, per
         result.carbsData = sortedDays.map(day => day.totalCarbs);
         result.fatData = sortedDays.map(day => day.totalFat);
         result.fiberData = sortedDays.map(day => day.totalFiber || 0);
+      } 
+      // For yearly: group by month
+      else if (period === 'yearly') {
+        // Define month names
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        result.labels = monthNames;
+        
+        // Initialize monthly totals
+        const monthlyTotals = Array(12).fill().map(() => ({
+          calories: 0,
+          protein: 0,
+          carbs: 0,
+          fat: 0,
+          fiber: 0,
+          count: 0
+        }));
+        
+        // Group data by month
+        if (data.days && data.days.length > 0) {
+          data.days.forEach(day => {
+            const date = new Date(day.date);
+            const month = date.getMonth();
+            
+            monthlyTotals[month].calories += day.totalCalories || 0;
+            monthlyTotals[month].protein += day.totalProtein || 0;
+            monthlyTotals[month].carbs += day.totalCarbs || 0;
+            monthlyTotals[month].fat += day.totalFat || 0;
+            monthlyTotals[month].fiber += day.totalFiber || 0;
+            monthlyTotals[month].count += 1;
+          });
+        }
+        
+        // Extract averages for each month
+        result.caloriesData = monthlyTotals.map(month => month.count ? month.calories / month.count : 0);
+        result.proteinData = monthlyTotals.map(month => month.count ? month.protein / month.count : 0);
+        result.carbsData = monthlyTotals.map(month => month.count ? month.carbs / month.count : 0);
+        result.fatData = monthlyTotals.map(month => month.count ? month.fat / month.count : 0);
+        result.fiberData = monthlyTotals.map(month => month.count ? month.fiber / month.count : 0);
       }
       
       return result;
@@ -135,7 +224,17 @@ export default function NutritionChart({ dailyData, weeklyData, monthlyData, per
 
   useEffect(() => {
     // Select appropriate data based on period
-    const data = period === 'daily' ? dailyData : period === 'weekly' ? weeklyData : monthlyData;
+    let data;
+    if (period === 'daily') {
+      data = dailyData;
+    } else if (period === 'weekly') {
+      data = weeklyData;
+    } else if (period === 'yearly') {
+      // Use dedicated yearly data if available
+      data = yearlyData;
+    } else {
+      data = monthlyData;
+    }
     
     if (!chartRef.current) return;
     
@@ -273,7 +372,7 @@ export default function NutritionChart({ dailyData, weeklyData, monthlyData, per
         chartInstance.current.destroy();
       }
     };
-  }, [period, dailyData, weeklyData, monthlyData]);
+  }, [period, dailyData, weeklyData, monthlyData, yearlyData]);
 
   return (
     <div className="w-full h-64">

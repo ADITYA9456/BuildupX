@@ -26,9 +26,39 @@ export default function Dashboard() {
         totalFiber: 0
       }
     },
-    weekly: { days: [] },
-    monthly: { days: [] },
-    yearly: { months: [] }
+    weekly: { 
+      days: [],
+      averages: {
+        labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        calories: [0, 0, 0, 0, 0, 0, 0],
+        protein: [0, 0, 0, 0, 0, 0, 0],
+        carbs: [0, 0, 0, 0, 0, 0, 0],
+        fat: [0, 0, 0, 0, 0, 0, 0],
+        fiber: [0, 0, 0, 0, 0, 0, 0]
+      }
+    },
+    monthly: { 
+      days: [],
+      averages: {
+        labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
+        calories: [0, 0, 0, 0],
+        protein: [0, 0, 0, 0],
+        carbs: [0, 0, 0, 0],
+        fat: [0, 0, 0, 0],
+        fiber: [0, 0, 0, 0]
+      }
+    },
+    yearly: { 
+      months: [],
+      averages: {
+        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        calories: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        protein: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        carbs: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        fat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        fiber: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      }
+    }
   });
   
   // Direct access to daily nutrition values for UI responsiveness
@@ -134,9 +164,39 @@ export default function Dashboard() {
       
       setNutritionData({
         daily: dailyData,
-        weekly: data.data.weekly || { days: [] },
-        monthly: data.data.monthly || { days: [] },
-        yearly: data.data.yearly || { months: [] }
+        weekly: data.data.weekly || { 
+          days: [],
+          averages: {
+            labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+            calories: [0, 0, 0, 0, 0, 0, 0],
+            protein: [0, 0, 0, 0, 0, 0, 0],
+            carbs: [0, 0, 0, 0, 0, 0, 0],
+            fat: [0, 0, 0, 0, 0, 0, 0],
+            fiber: [0, 0, 0, 0, 0, 0, 0]
+          }
+        },
+        monthly: data.data.monthly || { 
+          days: [],
+          averages: {
+            labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
+            calories: [0, 0, 0, 0],
+            protein: [0, 0, 0, 0],
+            carbs: [0, 0, 0, 0],
+            fat: [0, 0, 0, 0],
+            fiber: [0, 0, 0, 0]
+          }
+        },
+        yearly: data.data.yearly || { 
+          months: [],
+          averages: {
+            labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+            calories: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            protein: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            carbs: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            fat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            fiber: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+          }
+        }
       });
       
       // Calculate and set daily totals separately for immediate UI update

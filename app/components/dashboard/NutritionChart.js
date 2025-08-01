@@ -123,9 +123,17 @@ export default function NutritionChart({ dailyData, weeklyData, monthlyData, yea
         result.fatData = data.averages.fat || [0, 0, 0, 0];
         result.fiberData = data.averages.fiber || [0, 0, 0, 0];
       }
-      // For yearly: use yearlyData
+      // For yearly: use yearlyData with improved handling
       else if (period === 'yearly' && data.averages) {
         result.labels = data.averages.labels || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        
+        // Check for data in each nutrient category
+        const hasData = 
+          (data.averages.calories && data.averages.calories.some(val => val > 0)) ||
+          (data.averages.protein && data.averages.protein.some(val => val > 0)) ||
+          (data.averages.carbs && data.averages.carbs.some(val => val > 0)) ||
+          (data.averages.fat && data.averages.fat.some(val => val > 0));
+          
         result.caloriesData = data.averages.calories || Array(12).fill(0);
         result.proteinData = data.averages.protein || Array(12).fill(0);
         result.carbsData = data.averages.carbs || Array(12).fill(0);
@@ -231,7 +239,17 @@ export default function NutritionChart({ dailyData, weeklyData, monthlyData, yea
       data = weeklyData;
     } else if (period === 'yearly') {
       // Use dedicated yearly data if available
-      data = yearlyData;
+      data = yearlyData || { 
+        // If no yearly data, provide empty structure
+        averages: {
+          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+          calories: Array(12).fill(0),
+          protein: Array(12).fill(0),
+          carbs: Array(12).fill(0),
+          fat: Array(12).fill(0),
+          fiber: Array(12).fill(0)
+        }
+      };
     } else {
       data = monthlyData;
     }
@@ -241,7 +259,9 @@ export default function NutritionChart({ dailyData, weeklyData, monthlyData, yea
     // Check if we have any data
     const hasData = data && 
       ((data.meals && data.meals.length > 0) || 
-       (data.days && data.days.length > 0));
+       (data.days && data.days.length > 0) ||
+       (data.months && data.months.length > 0) ||
+       (data.averages && Object.keys(data.averages).length > 0));
     
     // Handle no data case
     if (!hasData) {
@@ -251,7 +271,7 @@ export default function NutritionChart({ dailyData, weeklyData, monthlyData, yea
         chartInstance.current = null;
       }
       
-      // Add a no-data message to the chart container
+      // Add a no-data message to the chart container only if there's really no data
       const container = chartRef.current.parentNode;
       
       // Clear any previous no-data message
@@ -260,7 +280,17 @@ export default function NutritionChart({ dailyData, weeklyData, monthlyData, yea
         container.removeChild(existingMessage);
       }
       
-      if (!container.querySelector('.no-data-message')) {
+      // Check if any period has data before showing no data message
+      const anyPeriodHasData = 
+        (dailyData && dailyData.meals && dailyData.meals.length > 0) || 
+        (weeklyData && weeklyData.days && weeklyData.days.length > 0) ||
+        (monthlyData && monthlyData.days && monthlyData.days.length > 0) ||
+        (yearlyData && yearlyData.months && yearlyData.months.length > 0) ||
+        (weeklyData && weeklyData.averages && Object.keys(weeklyData.averages).length > 0) ||
+        (monthlyData && monthlyData.averages && Object.keys(monthlyData.averages).length > 0) ||
+        (yearlyData && yearlyData.averages && Object.keys(yearlyData.averages).length > 0);
+      
+      if (!anyPeriodHasData && !container.querySelector('.no-data-message')) {
         const message = document.createElement('div');
         message.className = 'no-data-message';
         message.style.position = 'absolute';

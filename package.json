@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "add-rice": "node scripts/runAddRice.js",
+    "add-common-foods": "node -r next/dist/require-hook scripts/addCommonFoods.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

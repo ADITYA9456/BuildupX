@@ -10,15 +10,24 @@ export function middleware(request) {
   const isPublicPath = path === '/' || 
                        path === '/login' || 
                        path === '/setup-account' || 
+                       path === '/about' ||
+                       path === '/classes' ||
+                       path === '/contact' ||
                        path.startsWith('/api/') ||
                        path.startsWith('/_next/') ||
                        path.startsWith('/favicon');
+                       
+  // Define protected paths that require authentication
+  const isProtectedPath = path === '/tracker' ||
+                          path === '/dashboard' ||
+                          path === '/profile' ||
+                          path === '/workout';
 
   // Get the token from cookies
   const authToken = request.cookies.get('auth-token')?.value;
   
   // If path requires auth and no token exists, redirect to login
-  if (!isPublicPath && !authToken) {
+  if (isProtectedPath && !authToken) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
   

@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 
 // Food database with calorie values (per 100g or per standard serving)
 const foodDatabase = {
@@ -115,6 +116,8 @@ const foodDatabase = {
 };
 
 export default function CalorieTracker() {
+  const { user } = useAuth();
+  
   // User Profile State
   const [userProfile, setUserProfile] = useState({
     weight: 70,
@@ -143,9 +146,88 @@ export default function CalorieTracker() {
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [showAllFoods, setShowAllFoods] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
   // Track total calories
   const [totalCalories, setTotalCalories] = useState(0);
+  
+  // Fetch user's meal history when component loads or user changes
+  useEffect(() => {
+    const fetchUserMealHistory = async () => {
+      if (!user || !user.id) {
+        setIsLoading(false);
+        return;
+      }
+      
+      try {
+        setIsLoading(true);
+        console.log("Fetching meal data for user:", user.id);
+        
+        // First try to fetch user profile
+        const profileResponse = await fetch(`/api/tracker/profile?userId=${user.id}`);
+        if (profileResponse.ok) {
+          const profileData = await profileResponse.json();
+          if (profileData.success && profileData.profile) {
+            console.log("Found user profile:", profileData.profile);
+            setUserProfile(prevProfile => ({
+              ...prevProfile,
+              ...profileData.profile
+            }));
+            
+            // Calculate calorie goal based on the profile
+            const bmr = calculateBMR();
+            const tdee = calculateTDEE(bmr);
+            const calorieGoal = calculateCalorieGoal(tdee);
+            setDailyCalorieGoal(calorieGoal);
+            setFormSubmitted(true);
+          }
+        }
+        
+        // Then fetch food logs
+        const today = new Date();
+        const todayStr = today.toISOString().split('T')[0]; // Get YYYY-MM-DD
+        
+        console.log("Fetching food logs for date:", todayStr);
+        const response = await fetch(`/api/tracker/history?userId=${user.id}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch meal history');
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && data.logs && data.logs.length > 0) {
+          // Process the logs and organize them by meal type
+          const userMeals = {
+            breakfast: [],
+            lunch: [],
+            dinner: [],
+            snacks: []
+          };
+          
+          data.logs.forEach(log => {
+            if (userMeals[log.meal]) {
+              userMeals[log.meal].push({
+                id: log._id,
+                name: log.food,
+                quantity: log.quantity,
+                calories: log.calories,
+                caloriesPerUnit: log.calories / log.quantity
+              });
+            }
+          });
+          
+          // Update the meals state with fetched data
+          setMeals(userMeals);
+        }
+      } catch (error) {
+        console.error('Error fetching meal history:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchUserMealHistory();
+  }, [user]);
   
   useEffect(() => {
     // Calculate total calories whenever meals change
@@ -206,16 +288,21 @@ export default function CalorieTracker() {
     setFormSubmitted(true);
     
     // Save to database via API
-    fetch('/api/tracker/profile', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(userProfile),
-    })
+    if (user && user.id) {
+      fetch('/api/tracker/profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...userProfile,
+          userId: user.id
+        }),
+      })
       .then(response => response.json())
       .then(data => console.log('Profile saved:', data))
       .catch(error => console.error('Error saving profile:', error));
+    }
   };
   
   // Handle adding food to a meal
@@ -247,23 +334,25 @@ export default function CalorieTracker() {
       setShowSearchResults(false);
       
       // Save to database via API
-      fetch('/api/tracker/food-log', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: 'user_123', // In a real app, this would be the authenticated user's ID
-          meal: selectedMeal,
-          food: newFoodItem.name,
-          quantity: newFoodItem.quantity,
-          calories: newFoodItem.calories,
-          date: new Date()
-        }),
-      })
+      if (user && user.id) {
+        fetch('/api/tracker/food-log', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: user.id,
+            meal: selectedMeal,
+            food: newFoodItem.name,
+            quantity: newFoodItem.quantity,
+            calories: newFoodItem.calories,
+            date: new Date()
+          }),
+        })
         .then(response => response.json())
         .then(data => console.log('Food log saved:', data))
         .catch(error => console.error('Error saving food log:', error));
+      }
     }
   };
   
@@ -357,8 +446,15 @@ export default function CalorieTracker() {
   };
   
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      {/* Left column: User Profile */}
+    <>
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center p-10">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-green-500 border-opacity-50"></div>
+          <p className="mt-4 text-lg text-green-400">Loading your nutrition data...</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left column: User Profile */}
       <motion.div
         initial={{ opacity: 0, x: -50 }}
         animate={{ opacity: 1, x: 0 }}
@@ -745,6 +841,9 @@ export default function CalorieTracker() {
           </div>
         </div>
       </motion.div>
-    </div>
+          </motion.div>
+        </div>
+      )}
+    </>
   );
 }

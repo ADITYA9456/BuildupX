@@ -1,0 +1,345 @@
+import jwt from 'jsonwebtoken';
+import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
+import { connectDB } from '../../../../lib/db';
+import Meal from '../../../../models/Meal';
+import { getMonthlyAverages, getWeeklyAverages, summarizeMealsByDay } from './helpers';
+
+export async function GET() {
+  try {
+    console.log('🍎 Nutrition API called');
+    
+    // Get the token from cookies
+    const cookieStore = cookies();
+    const token = cookieStore.get('auth-token')?.value || cookieStore.get('token')?.value;
+    
+    if (!token) {
+      console.error('No authentication token found in cookies');
+      return NextResponse.json({ 
+        success: false,
+        error: 'Authentication required',
+        message: 'Please log in to access this data'
+      }, { status: 401 });
+    }
+    
+    console.log('🔑 Token found, verifying...');
+    
+    // Verify the token
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-jwt-secret');
+      console.log('✅ Token verified successfully');
+    } catch (error) {
+      console.error('❌ Token verification failed:', error.message);
+      return NextResponse.json({ 
+        success: false,
+        error: 'Invalid or expired token',
+        message: 'Your session has expired. Please log in again.'
+      }, { status: 401 });
+    }
+    
+    const userId = decoded.id;
+    
+    if (!userId) {
+      console.error('⚠️ No user ID found in token');
+      return NextResponse.json({ 
+        success: false,
+        error: 'Invalid user session',
+        message: 'User ID not found in token. Please log in again.'
+      }, { status: 401 });
+    }
+    
+    console.log('👤 User ID:', userId);
+    
+    // Connect to the database
+    try {
+      console.log('🔌 Connecting to database...');
+      await connectDB();
+      console.log('✅ Database connected successfully');
+    } catch (dbError) {
+      console.error('❌ Database connection error:', dbError);
+      return NextResponse.json({ 
+        success: false,
+        error: 'Database connection failed',
+        message: 'Could not connect to the database. Please try again later.'
+      }, { status: 500 });
+    }
+    
+    // Get all meals for the user
+    let userMeals = [];
+    try {
+      console.log('🍽️ Fetching meals for user:', userId);
+      userMeals = await Meal.find({ userId }).sort({ date: -1 });
+      console.log(`✅ Found ${userMeals.length} meals`);
+    } catch (fetchError) {
+      console.error('❌ Error fetching meals:', fetchError);
+      return NextResponse.json({ 
+        success: false,
+        error: 'Failed to fetch meals',
+        message: 'Could not retrieve your meal data. Please try again later.'
+      }, { status: 500 });
+    }
+    
+    if (!userMeals || userMeals.length === 0) {
+      const emptyData = {
+        daily: {
+          summary: {
+            date: new Date().toISOString().split('T')[0],
+            totalCalories: 0,
+            totalProtein: 0,
+            totalCarbs: 0,
+            totalFat: 0,
+            totalFiber: 0,
+            meals: []
+          },
+          meals: []
+        },
+        weekly: { 
+          days: [],
+          averages: { labels: [], calories: [], protein: [], carbs: [], fat: [], fiber: [] },
+          chartData: { 
+            labels: [], 
+            datasets: [
+              { label: 'Calories', data: [] },
+              { label: 'Protein', data: [] },
+              { label: 'Carbs', data: [] },
+              { label: 'Fat', data: [] },
+              { label: 'Fiber', data: [] }
+            ] 
+          }
+        },
+        monthly: { 
+          days: [],
+          averages: { labels: [], calories: [], protein: [], carbs: [], fat: [], fiber: [] },
+          chartData: { 
+            labels: [], 
+            datasets: [
+              { label: 'Calories', data: [] },
+              { label: 'Protein', data: [] },
+              { label: 'Carbs', data: [] },
+              { label: 'Fat', data: [] },
+              { label: 'Fiber', data: [] }
+            ] 
+          }
+        }
+      };
+      
+      return NextResponse.json({
+        success: true,
+        data: emptyData,
+        message: 'No meal data found'
+      });
+    }
+    
+    // Process and organize the data
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const todayStr = today.toISOString().split('T')[0];
+    
+    // Get today's meals
+    const todayMeals = userMeals.filter(meal => {
+      try {
+        const mealDate = new Date(meal.date);
+        mealDate.setHours(0, 0, 0, 0);
+        return mealDate.getTime() === today.getTime();
+      } catch (err) {
+        console.error('Error filtering today meal:', err);
+        return false;
+      }
+    });
+    
+    // Calculate daily summary 
+    // We'll just use the summarizeMealsByDay function directly on today's meals
+    const dailySummaryArray = summarizeMealsByDay(todayMeals);
+    
+    // We need the first item if it exists, otherwise create an empty summary
+    let dailySummary = {
+      date: todayStr,
+      totalCalories: 0,
+      totalProtein: 0, 
+      totalCarbs: 0,
+      totalFat: 0,
+      totalFiber: 0,
+      meals: []
+    };
+    
+    if (dailySummaryArray.length > 0) {
+      try {
+        dailySummary = dailySummaryArray[0];
+      } catch (error) {
+        console.error('Error getting daily summary:', error);
+      }
+    }
+    
+    // Get weekly and monthly data
+    const weeklyAverages = getWeeklyAverages(userMeals);
+    const monthlyAverages = getMonthlyAverages(userMeals);
+    
+    // Get the last 7 days data for weekly view
+    const weeklyMeals = userMeals.filter(meal => {
+      try {
+        const mealDate = new Date(meal.date);
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        return mealDate >= sevenDaysAgo;
+      } catch (err) {
+        console.error('Error filtering weekly meal:', err);
+        return false;
+      }
+    });
+    
+    const last7Days = weeklyMeals.length > 0 ? summarizeMealsByDay(weeklyMeals) : [];
+    
+    // Get the last 30 days data for monthly view
+    const monthlyMeals = userMeals.filter(meal => {
+      try {
+        const mealDate = new Date(meal.date);
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        return mealDate >= thirtyDaysAgo;
+      } catch (err) {
+        console.error('Error filtering monthly meal:', err);
+        return false;
+      }
+    });
+    
+    const last30Days = monthlyMeals.length > 0 ? summarizeMealsByDay(monthlyMeals) : [];
+    
+    // Format data for charts with safety checks
+    console.log('📊 Formatting chart data...');
+    
+    // Ensure weeklyAverages has all required properties
+    const safeWeeklyAverages = {
+      labels: weeklyAverages?.labels || [],
+      calories: weeklyAverages?.calories || [],
+      protein: weeklyAverages?.protein || [],
+      carbs: weeklyAverages?.carbs || [],
+      fat: weeklyAverages?.fat || [],
+      fiber: weeklyAverages?.fiber || []
+    };
+    
+    const weeklyChartData = {
+      labels: safeWeeklyAverages.labels,
+      datasets: [
+        { label: 'Calories', data: safeWeeklyAverages.calories },
+        { label: 'Protein', data: safeWeeklyAverages.protein },
+        { label: 'Carbs', data: safeWeeklyAverages.carbs },
+        { label: 'Fat', data: safeWeeklyAverages.fat },
+        { label: 'Fiber', data: safeWeeklyAverages.fiber }
+      ]
+    };
+    
+    // Ensure monthlyAverages has all required properties
+    const safeMonthlyAverages = {
+      labels: monthlyAverages?.labels || [],
+      calories: monthlyAverages?.calories || [],
+      protein: monthlyAverages?.protein || [],
+      carbs: monthlyAverages?.carbs || [],
+      fat: monthlyAverages?.fat || [],
+      fiber: monthlyAverages?.fiber || []
+    };
+    
+    const monthlyChartData = {
+      labels: safeMonthlyAverages.labels,
+      datasets: [
+        { label: 'Calories', data: safeMonthlyAverages.calories },
+        { label: 'Protein', data: safeMonthlyAverages.protein },
+        { label: 'Carbs', data: safeMonthlyAverages.carbs },
+        { label: 'Fat', data: safeMonthlyAverages.fat },
+        { label: 'Fiber', data: safeMonthlyAverages.fiber }
+      ]
+    };
+    
+    // Compile the complete nutrition data with safety checks
+    try {
+      console.log('🔄 Compiling final nutrition data');
+      
+      const nutritionData = {
+        daily: {
+          summary: dailySummary || {
+            date: todayStr,
+            totalCalories: 0,
+            totalProtein: 0,
+            totalCarbs: 0,
+            totalFat: 0,
+            totalFiber: 0,
+            meals: []
+          },
+          meals: todayMeals || []
+        },
+        weekly: {
+          days: last7Days || [],
+          averages: safeWeeklyAverages || { labels: [], calories: [], protein: [], carbs: [], fat: [], fiber: [] },
+          chartData: weeklyChartData || { labels: [], datasets: [] }
+        },
+        monthly: {
+          days: last30Days || [],
+          averages: safeMonthlyAverages || { labels: [], calories: [], protein: [], carbs: [], fat: [], fiber: [] },
+          chartData: monthlyChartData || { labels: [], datasets: [] }
+        }
+      };
+      
+      console.log('✅ Nutrition data compiled successfully');
+      
+      return NextResponse.json({
+        success: true,
+        data: nutritionData,
+        message: 'Nutrition data retrieved successfully'
+      });
+    } catch (finalError) {
+      console.error('❌ Error compiling final nutrition data:', finalError);
+      return NextResponse.json({ 
+        success: false,
+        error: 'Failed to process nutrition data',
+        message: 'Error while processing your nutrition data. Please try again later.'
+      }, { status: 500 });
+    }
+    
+  } catch (error) {
+    console.error('❌ Nutrition API error:', error);
+    
+    // Check if it's a token-related error
+    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+      return NextResponse.json({ 
+        success: false,
+        error: 'Authentication failed',
+        code: error.name,
+        message: 'Your session is invalid or has expired. Please log in again.',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      }, { status: 401 });
+    }
+    
+    // Handle database connection errors
+    if (error.name === 'MongooseError' || error.name === 'MongoError') {
+      return NextResponse.json({ 
+        success: false,
+        error: 'Database error',
+        code: 'DB_ERROR',
+        message: 'Could not connect to the database. Please try again later.',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      }, { status: 503 });
+    }
+    
+    // Generic error response
+    return NextResponse.json({ 
+      success: false,
+      error: 'Failed to fetch nutrition data',
+      code: 'SERVER_ERROR',
+      message: 'Something went wrong. Please try again later.',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    }, { status: 500 });
+  }
+}
+
+export async function POST() {
+  return NextResponse.json({ error: 'Method not allowed' }, { status: 405 });
+}
+
+export async function PUT() {
+  return NextResponse.json({ error: 'Method not allowed' }, { status: 405 });
+}
+
+export async function DELETE() {
+  return NextResponse.json({ error: 'Method not allowed' }, { status: 405 });
+}

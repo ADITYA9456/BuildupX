@@ -2,8 +2,17 @@
 export function summarizeMealsByDay(meals) {
   const days = {};
   
+  if (!meals || !Array.isArray(meals) || meals.length === 0) {
+    return [];
+  }
+  
   meals.forEach(meal => {
-    const dateStr = new Date(meal.date).toISOString().split('T')[0]; // YYYY-MM-DD
+    try {
+      if (!meal.date) {
+        console.error('Meal missing date:', meal);
+        return;
+      }
+      const dateStr = new Date(meal.date).toISOString().split('T')[0]; // YYYY-MM-DD
     
     if (!days[dateStr]) {
       days[dateStr] = {
@@ -32,10 +41,22 @@ export function summarizeMealsByDay(meals) {
     }
     
     days[dateStr].meals.push(meal);
+    } catch (error) {
+      console.error('Error processing meal in summarizeMealsByDay:', error);
+    }
   });
   
+  if (Object.keys(days).length === 0) {
+    return [];
+  }
+  
   // Convert to array sorted by date
-  return Object.values(days).sort((a, b) => new Date(a.date) - new Date(b.date));
+  try {
+    return Object.values(days).sort((a, b) => new Date(a.date) - new Date(b.date));
+  } catch (error) {
+    console.error('Error sorting in summarizeMealsByDay:', error);
+    return Object.values(days);
+  }
 }
 
 // Format date for nice display

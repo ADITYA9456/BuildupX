@@ -169,16 +169,10 @@ export default function Aboutus() {
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 2, duration: 0.8 }}
-                                whileHover={{ 
-                                    scale: 1.05, 
-                                    boxShadow: "0 0 30px rgba(220, 38, 38, 0.5)",
-                                    background: "linear-gradient(45deg, #dc2626, #ea580c)"
-                                }}
-                                whileTap={{ scale: 0.95 }}
-                                className="w-fit bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white font-bold py-4 px-10 rounded-full transition-all duration-300 shadow-lg text-lg uppercase tracking-wide cursor-pointer"
                             >
-                                BUY MEMBERSHIP
+                                {/* BUY MEMBERSHIP button removed as requested */}
                             </motion.button>
+                            
                         </motion.div>
                     </div>
 

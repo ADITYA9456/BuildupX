@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import DietPlanGenerator from '../components/dashboard/DietPlanGenerator';
 import MealTracker from '../components/dashboard/MealTracker';
 import NutritionChart from '../components/dashboard/NutritionChart';
 import EnhancedNavbar from '../components/EnhancedNavbar';
@@ -15,6 +16,7 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
   const [nutritionPeriod, setNutritionPeriod] = useState('weekly');
+  const [showDietPlanGenerator, setShowDietPlanGenerator] = useState(false);
   const [nutritionData, setNutritionData] = useState({
     daily: { 
       meals: [],
@@ -493,6 +495,9 @@ export default function Dashboard() {
                     };
                   };
                   
+                  // Make calculateTargets available to other components
+                  window.calculateTargets = calculateTargets;
+                  
                   // Get personalized targets
                   const targets = calculateTargets();
                   
@@ -623,6 +628,52 @@ export default function Dashboard() {
               </div>
             </div>
           </motion.div>
+
+          {/* Diet Plan Generator Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="mt-8 flex justify-center"
+          >
+            <button
+              onClick={() => setShowDietPlanGenerator(true)}
+              className="px-6 py-3 bg-green-500 hover:bg-green-600 rounded-lg text-white font-medium flex items-center shadow-lg transition-all"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+              </svg>
+              Generate Personalized Diet Plan
+            </button>
+          </motion.div>
+          
+          {/* Diet Plan Modal */}
+          {showDietPlanGenerator && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 p-4 overflow-y-auto">
+              <div className="max-w-4xl w-full max-h-90vh">
+                <DietPlanGenerator 
+                  profileData={profileData} 
+                  dailyTargets={{
+                    calories: calculateTargets().calories,
+                    protein: calculateTargets().protein,
+                    carbs: calculateTargets().carbs,
+                    fat: calculateTargets().fat,
+                    fiber: calculateTargets().fiber
+                  }}
+                  onClose={(success) => {
+                    setShowDietPlanGenerator(false);
+                    if (success) {
+                      setToast({
+                        show: true,
+                        message: 'Diet plan PDF downloaded successfully!',
+                        type: 'success'
+                      });
+                    }
+                  }} 
+                />
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </>

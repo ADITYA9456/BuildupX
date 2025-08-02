@@ -1,5 +1,6 @@
 "use client";
 import { motion, useInView } from "framer-motion";
+import Link from "next/link";
 import { useRef } from "react";
 import Navbar from "./Navbar";
 
@@ -204,8 +205,8 @@ export default function Classes() {
 								ease: "easeInOut",
 							}}
 							style={{
-								left: `${Math.random() * 100}%`,
-								top: `${Math.random() * 100}%`,
+								left: `${(i * 5) % 100}%`,
+								top: `${(i * 7) % 100}%`,
 							}}
 						/>
 					))}
@@ -295,17 +296,19 @@ export default function Classes() {
 						transition={{ duration: 0.8, delay: 2 }}
 						className="text-center"
 					>
-						<motion.button
-							whileHover={{
-								scale: 1.05,
-								boxShadow: "0 0 30px rgba(34, 197, 94, 0.5)",
-								background: "linear-gradient(45deg, #059669, #10b981)",
-							}}
-							whileTap={{ scale: 0.95 }}
-							className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-4 px-10 rounded-full transition-all duration-300 shadow-lg text-lg uppercase tracking-wide border border-green-400 cursor-pointer"
-						>
-							Join Our Classes Today
-						</motion.button>
+						<Link href="/#membership" passHref>
+							<motion.button
+								whileHover={{
+									scale: 1.05,
+									boxShadow: "0 0 30px rgba(34, 197, 94, 0.5)",
+									background: "linear-gradient(45deg, #059669, #10b981)",
+								}}
+								whileTap={{ scale: 0.95 }}
+								className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-4 px-10 rounded-full transition-all duration-300 shadow-lg text-lg uppercase tracking-wide border border-green-400 cursor-pointer"
+							>
+								Join Classes
+							</motion.button>
+						</Link>
 					</motion.div>
 				</div>
 			</section>

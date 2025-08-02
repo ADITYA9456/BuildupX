@@ -3,6 +3,7 @@ import { motion, useInView } from "framer-motion";
 import Link from "next/link";
 import { useRef } from "react";
 import Navbar from "./Navbar";
+import Footer from "./Footer";
 
 const classesData = [
 	{
@@ -312,6 +313,7 @@ export default function Classes() {
 					</motion.div>
 				</div>
 			</section>
+			<Footer />
 		</>
 	);
 }

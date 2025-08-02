@@ -3,6 +3,7 @@ import { motion, useInView } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import Navbar from "./Navbar";
+import Footer from "./Footer";
 
 export default function Aboutus() {
     const [particles, setParticles] = useState([]);
@@ -204,6 +205,7 @@ export default function Aboutus() {
                     </motion.div>
                 </div>
             </section>
+            <Footer />
         </>
     );
 }

@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useInView } from 'framer-motion';
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import PaymentModal from './components/PaymentModal';
 
 const heroSlides = [
@@ -630,6 +631,7 @@ export default function Home() {
                     />
                 )}
             </main>
+            <Footer />
         </>
     );
 }

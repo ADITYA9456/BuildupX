@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import CalorieTracker from '../components/CalorieTracker';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 export default function TrackerPage() {
   const [particles, setParticles] = useState([]);
@@ -99,6 +100,7 @@ export default function TrackerPage() {
           <CalorieTracker />
         </div>
       </main>
+      <Footer />
     </>
   );
 }

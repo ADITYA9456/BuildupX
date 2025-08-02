@@ -3,6 +3,7 @@ import { motion, useInView } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import Navbar from "./Navbar";
+import Footer from "./Footer";
 
 export default function ContactPage() {
     const [formData, setFormData] = useState({
@@ -309,6 +310,7 @@ export default function ContactPage() {
                     </motion.div>
                 </div>
             </section>
+            <Footer />
         </>
     );
 }

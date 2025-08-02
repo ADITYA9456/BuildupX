@@ -2,8 +2,8 @@
 import { motion, useInView } from "framer-motion";
 import Link from "next/link";
 import { useRef } from "react";
-import Navbar from "./Navbar";
 import Footer from "./Footer";
+import Navbar from "./Navbar";
 
 const classesData = [
 	{

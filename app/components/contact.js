@@ -2,8 +2,8 @@
 import { motion, useInView } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import Navbar from "./Navbar";
 import Footer from "./Footer";
+import Navbar from "./Navbar";
 
 export default function ContactPage() {
     const [formData, setFormData] = useState({

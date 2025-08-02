@@ -3,8 +3,8 @@
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import CalorieTracker from '../components/CalorieTracker';
-import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import Navbar from '../components/Navbar';
 
 export default function TrackerPage() {
   const [particles, setParticles] = useState([]);

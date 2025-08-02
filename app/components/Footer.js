@@ -1,7 +1,7 @@
 'use client';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { FaFacebook, FaTwitter, FaInstagram, FaYoutube, FaDumbbell } from 'react-icons/fa';
+import { FaDumbbell, FaFacebook, FaInstagram, FaTwitter, FaYoutube } from 'react-icons/fa';
 import { IoIosFitness } from 'react-icons/io';
 import { MdEmail, MdPhone } from 'react-icons/md';
 

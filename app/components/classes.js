@@ -162,18 +162,20 @@ const ClassCard = ({ classItem, index }) => {
 			</motion.p>
 
 			{/* Hover Effect Button */}
-			<motion.button
-				initial={{ opacity: 0, y: 20 }}
-				animate={
-					isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }
-				}
-				transition={{ duration: 0.6, delay: index * 0.15 + 1.2 }}
-				whileHover={{ scale: 1.05 }}
-				whileTap={{ scale: 0.95 }}
-				className={`mt-6 px-6 py-2 rounded-full text-white font-semibold bg-gradient-to-r ${classItem.color} hover:shadow-lg transition-all duration-300 relative z-10 cursor-pointer`}
-			>
-				Learn More
-			</motion.button>
+			<Link href="/coming-soon" passHref>
+				<motion.button
+					initial={{ opacity: 0, y: 20 }}
+					animate={
+						isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }
+					}
+					transition={{ duration: 0.6, delay: index * 0.15 + 1.2 }}
+					whileHover={{ scale: 1.05 }}
+					whileTap={{ scale: 0.95 }}
+					className={`mt-6 px-6 py-2 rounded-full text-white font-semibold bg-gradient-to-r ${classItem.color} hover:shadow-lg transition-all duration-300 relative z-10 cursor-pointer`}
+				>
+					Learn More
+				</motion.button>
+			</Link>
 		</motion.div>
 	);
 };

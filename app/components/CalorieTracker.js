@@ -841,7 +841,6 @@ export default function CalorieTracker() {
           </div>
         </div>
       </motion.div>
-          </motion.div>
         </div>
       )}
     </>

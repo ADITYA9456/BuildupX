@@ -8,7 +8,7 @@ export default function ComingSoon() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center relative overflow-hidden">
+      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center relative overflow-hidden pt-20">
         {/* Background elements */}
         <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900" />
         

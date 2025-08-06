@@ -183,7 +183,7 @@ export default function Home() {
                 {/* Hero Section */}
                 <section
                     id="home"
-                    className="relative min-h-screen flex flex-col md:flex-row items-center justify-between px-4 sm:px-8 overflow-hidden bg-gray-900"
+                    className="relative min-h-screen flex flex-col md:flex-row items-center justify-between px-4 sm:px-8 pt-20 overflow-hidden bg-gray-900"
                     style={{
                         backgroundImage: `url('${heroSlides[slide].bg}')`,
                         backgroundSize: 'cover',

@@ -80,7 +80,7 @@ export default function Navbar() {
                 scale: 1.02
               }}
             >
-              <span className="relative z-10">GYM X</span>
+              <span className="relative z-10">Buildup<span className=" text-amber-950">X</span></span>
               {/* Animated background */}
               <motion.div
                 className="absolute inset-0 bg-gradient-to-r from-green-400 to-green-500 opacity-0"

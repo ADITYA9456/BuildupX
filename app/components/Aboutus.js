@@ -110,7 +110,7 @@ export default function Aboutus() {
                             >
                                 <Image
                                     src="/img/a.jpg"
-                                    alt="GymX Trainer"
+                                    alt="Buildup X Trainer"
                                     fill
                                     className="object-cover"
                                     priority
@@ -145,7 +145,7 @@ export default function Aboutus() {
                                 transition={{ delay: 1.4, duration: 0.8 }}
                                 className="text-gray-300 text-lg leading-relaxed"
                             >
-                                Welcome to <span className="text-red-500 font-bold">GymX</span>, where fitness is our passion and helping people is our mission! If you're searching for the best gym near you, look no further. Founded by dedicated Aeronautical engineers, we aim to make a positive impact on lives by celebrating fitness and empowering healthier lifestyles.
+                                Welcome to <span className="text-red-500 font-bold">Buildup X</span>, where fitness is our passion and helping people is our mission! If you're searching for the best gym near you, look no further. Founded by dedicated Aeronautical engineers, we aim to make a positive impact on lives by celebrating fitness and empowering healthier lifestyles.
                             </motion.p>
                             
                             <motion.p
@@ -154,7 +154,7 @@ export default function Aboutus() {
                                 transition={{ delay: 1.6, duration: 0.8 }}
                                 className="text-gray-400 leading-relaxed"
                             >
-                                With <span className="text-red-500 font-bold">10+ years</span> of experience, thousands of satisfied customers, and multiple branches since 2014, GymX is transforming lives through tailored fitness programs and countless success stories.
+                                With <span className="text-red-500 font-bold">10+ years</span> of experience, thousands of satisfied customers, and multiple branches since 2014, Buildup X is transforming lives through tailored fitness programs and countless success stories.
                             </motion.p>
                             
                             <motion.p
@@ -163,7 +163,7 @@ export default function Aboutus() {
                                 transition={{ delay: 1.8, duration: 0.8 }}
                                 className="text-gray-400 leading-relaxed"
                             >
-                                At GymX, we believe in <span className="text-red-400 font-semibold">pushing limits</span>, breaking barriers, and achieving the extraordinary. Join us and be a part of our fitness revolution.
+                                At Buildup X, we believe in <span className="text-red-400 font-semibold">pushing limits</span>, breaking barriers, and achieving the extraordinary. Join us and be a part of our fitness revolution.
                             </motion.p>
                             
                             <motion.button

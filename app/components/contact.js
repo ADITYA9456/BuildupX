@@ -201,7 +201,7 @@ export default function ContactPage() {
                                 </div>
                                 <h3 className="text-2xl font-bold text-white mb-3">Drop Us a Line</h3>
                                 <p className="text-gray-300 leading-relaxed">
-                                    gymx.bauenad@gmail.com
+                                    buildupx.contact@gmail.com
                                 </p>
                             </div>
                         </motion.div>

@@ -56,7 +56,7 @@ export default function Footer() {
               >
                 <IoIosFitness className="text-2xl text-green-500 mr-2" />
               </motion.div>
-              <span className="text-lg font-bold text-white">GYM X</span>
+              <span className="text-lg font-bold text-white">Buildup X</span>
             </div>
 
             {/* Social Icons */}
@@ -188,12 +188,12 @@ export default function Footer() {
                   +1 456-777-8882
                 </motion.a>
                 <motion.a 
-                  href="mailto:info@gymx.com"
+                  href="mailto:info@buildupx.com"
                   whileHover={{ x: 3, color: "#22c55e" }}
                   className="flex items-center text-gray-400"
                 >
                   <MdEmail className="text-green-500 mr-1" />
-                  info@gymx.com
+                  info@buildupx.com
                 </motion.a>
               </div>
             </div>
@@ -216,7 +216,7 @@ export default function Footer() {
           className="flex flex-col md:flex-row justify-between items-center"
         >
           <p className="text-gray-500 text-xs mb-1 md:mb-0">
-            © {currentYear} GYM X
+            © {currentYear} Buildup X
           </p>
           <div className="flex space-x-3 text-xs text-gray-500">
             <Link href="/privacy" className="hover:text-green-500">Privacy</Link>

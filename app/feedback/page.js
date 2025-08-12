@@ -342,8 +342,8 @@ export default function FeedbackPage() {
             </p>
             <p className="text-gray-500 text-sm">
               For urgent inquiries, please contact us directly at{' '}
-              <a href="mailto:info@gymx.com" className="text-green-500 hover:text-green-400 transition-colors duration-300 cursor-pointer">
-                info@gymx.com
+              <a href="mailto:info@buildupx.com" className="text-green-500 hover:text-green-400 transition-colors duration-300 cursor-pointer">
+                info@buildupx.com
               </a>
             </p>
           </motion.div>

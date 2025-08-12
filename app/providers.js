@@ -1,6 +1,7 @@
 'use client';
 
 import { Toaster } from 'react-hot-toast';
+import GeminiChatbot from './components/GeminiChatbot';
 import { AuthProvider } from './context/AuthContext';
 
 export function Providers({ children }) {
@@ -32,6 +33,7 @@ export function Providers({ children }) {
           }}
         />
         {children}
+        <GeminiChatbot />
       </AuthProvider>
     </>
   );

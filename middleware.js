@@ -13,16 +13,16 @@ export function middleware(request) {
                        path === '/about' ||
                        path === '/classes' ||
                        path === '/contact' ||
+                       path === '/tracker' ||
                        path.startsWith('/api/') ||
                        path.startsWith('/_next/') ||
                        path.startsWith('/favicon');
                        
   // Define protected paths that require authentication
-  const isProtectedPath = path === '/tracker' ||
-                          path === '/dashboard' ||
+  const isProtectedPath = path === '/dashboard' ||
                           path === '/profile' ||
                           path === '/workout';
-
+                          
   // Get the token from cookies
   const authToken = request.cookies.get('auth-token')?.value;
   

@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import { useAuth } from '../context/AuthContext';
 
 // Food database with calorie values (per 100g or per standard serving)
 const foodDatabase = {
@@ -116,8 +115,9 @@ const foodDatabase = {
 };
 
 export default function CalorieTracker() {
-  const { user } = useAuth();
-  
+  // Set user to null to make the tracker work without authentication
+  const user = null;
+
   // User Profile State
   const [userProfile, setUserProfile] = useState({
     weight: 70,
@@ -151,83 +151,52 @@ export default function CalorieTracker() {
   // Track total calories
   const [totalCalories, setTotalCalories] = useState(0);
   
-  // Fetch user's meal history when component loads or user changes
+  // Load user data when component loads
   useEffect(() => {
-    const fetchUserMealHistory = async () => {
-      if (!user || !user.id) {
-        setIsLoading(false);
-        return;
-      }
-      
+    const loadUserData = () => {
       try {
         setIsLoading(true);
-        console.log("Fetching meal data for user:", user.id);
         
-        // First try to fetch user profile
-        const profileResponse = await fetch(`/api/tracker/profile?userId=${user.id}`);
-        if (profileResponse.ok) {
-          const profileData = await profileResponse.json();
-          if (profileData.success && profileData.profile) {
-            console.log("Found user profile:", profileData.profile);
-            setUserProfile(prevProfile => ({
-              ...prevProfile,
-              ...profileData.profile
-            }));
-            
-            // Calculate calorie goal based on the profile
-            const bmr = calculateBMR();
-            const tdee = calculateTDEE(bmr);
-            const calorieGoal = calculateCalorieGoal(tdee);
-            setDailyCalorieGoal(calorieGoal);
-            setFormSubmitted(true);
-          }
-        }
+        // Try to load data from localStorage
+        const savedProfile = localStorage.getItem('userProfile');
+        const savedMeals = localStorage.getItem('userMeals');
         
-        // Then fetch food logs
-        const today = new Date();
-        const todayStr = today.toISOString().split('T')[0]; // Get YYYY-MM-DD
-        
-        console.log("Fetching food logs for date:", todayStr);
-        const response = await fetch(`/api/tracker/history?userId=${user.id}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch meal history');
-        }
-        
-        const data = await response.json();
-        
-        if (data.success && data.logs && data.logs.length > 0) {
-          // Process the logs and organize them by meal type
-          const userMeals = {
-            breakfast: [],
-            lunch: [],
-            dinner: [],
-            snacks: []
-          };
+        if (savedProfile) {
+          const profileData = JSON.parse(savedProfile);
+          setUserProfile(profileData);
           
-          data.logs.forEach(log => {
-            if (userMeals[log.meal]) {
-              userMeals[log.meal].push({
-                id: log._id,
-                name: log.food,
-                quantity: log.quantity,
-                calories: log.calories,
-                caloriesPerUnit: log.calories / log.quantity
-              });
-            }
-          });
-          
-          // Update the meals state with fetched data
-          setMeals(userMeals);
+          // Calculate calorie goal based on the profile
+          const { weight, height, age, gender, activityLevel, goal } = profileData;
+          const bmr = calculateBMR(weight, height, age, gender);
+          const tdee = calculateTDEE(bmr, activityLevel);
+          const calorieGoal = calculateCalorieGoal(tdee, goal);
+          setDailyCalorieGoal(calorieGoal);
+          setFormSubmitted(true);
+        } else {
+          // Use default profile values
+          const { weight, height, age, gender, activityLevel, goal } = userProfile;
+          const bmr = calculateBMR(weight, height, age, gender);
+          const tdee = calculateTDEE(bmr, activityLevel);
+          const calorieGoal = calculateCalorieGoal(tdee, goal);
+          setDailyCalorieGoal(calorieGoal);
         }
+        
+        if (savedMeals) {
+          setMeals(JSON.parse(savedMeals));
+        }
+        
       } catch (error) {
-        console.error('Error fetching meal history:', error);
+        console.error('Error loading user data:', error);
       } finally {
         setIsLoading(false);
       }
     };
     
-    fetchUserMealHistory();
-  }, [user]);
+    loadUserData();
+    
+    // This effect only runs on initial mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   useEffect(() => {
     // Calculate total calories whenever meals change
@@ -241,8 +210,7 @@ export default function CalorieTracker() {
   }, [meals]);
   
   // Calculate BMR (Mifflin-St Jeor Equation)
-  const calculateBMR = () => {
-    const { weight, height, age, gender } = userProfile;
+  const calculateBMR = (weight, height, age, gender) => {
     if (gender === 'male') {
       return (10 * weight) + (6.25 * height) - (5 * age) + 5;
     } else {
@@ -251,8 +219,7 @@ export default function CalorieTracker() {
   };
   
   // Calculate TDEE based on activity level
-  const calculateTDEE = (bmr) => {
-    const { activityLevel } = userProfile;
+  const calculateTDEE = (bmr, activityLevel) => {
     const activityFactors = {
       'sedentary': 1.2,
       'light': 1.375,
@@ -264,8 +231,7 @@ export default function CalorieTracker() {
   };
   
   // Calculate calorie goal based on user's goal
-  const calculateCalorieGoal = (tdee) => {
-    const { goal } = userProfile;
+  const calculateCalorieGoal = (tdee, goal) => {
     if (goal === 'lose') {
       return Math.round(tdee - 500); // Deficit of 500 calories
     } else if (goal === 'gain') {
@@ -280,29 +246,16 @@ export default function CalorieTracker() {
     e.preventDefault();
     
     // Calculate calorie goal
-    const bmr = calculateBMR();
-    const tdee = calculateTDEE(bmr);
-    const calorieGoal = calculateCalorieGoal(tdee);
+    const { weight, height, age, gender, activityLevel, goal } = userProfile;
+    const bmr = calculateBMR(weight, height, age, gender);
+    const tdee = calculateTDEE(bmr, activityLevel);
+    const calorieGoal = calculateCalorieGoal(tdee, goal);
     
     setDailyCalorieGoal(calorieGoal);
     setFormSubmitted(true);
     
-    // Save to database via API
-    if (user && user.id) {
-      fetch('/api/tracker/profile', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...userProfile,
-          userId: user.id
-        }),
-      })
-      .then(response => response.json())
-      .then(data => console.log('Profile saved:', data))
-      .catch(error => console.error('Error saving profile:', error));
-    }
+    // Save to localStorage
+    localStorage.setItem('userProfile', JSON.stringify(userProfile));
   };
   
   // Handle adding food to a meal
@@ -333,26 +286,17 @@ export default function CalorieTracker() {
       setFoodQuantity(1);
       setShowSearchResults(false);
       
-      // Save to database via API
-      if (user && user.id) {
-        fetch('/api/tracker/food-log', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            userId: user.id,
-            meal: selectedMeal,
-            food: newFoodItem.name,
-            quantity: newFoodItem.quantity,
-            calories: newFoodItem.calories,
-            date: new Date()
-          }),
-        })
-        .then(response => response.json())
-        .then(data => console.log('Food log saved:', data))
-        .catch(error => console.error('Error saving food log:', error));
-      }
+      // Update localStorage when a new meal is added
+      const updatedMeals = prevMeals => {
+        const newMeals = {
+          ...prevMeals,
+          [selectedMeal]: [...prevMeals[selectedMeal], newFoodItem]
+        };
+        localStorage.setItem('userMeals', JSON.stringify(newMeals));
+        return newMeals;
+      };
+      
+      setMeals(updatedMeals);
     }
   };
   

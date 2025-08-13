@@ -47,14 +47,10 @@ export default function PaymentModal({ isOpen, onClose, plan, price }) {
         throw new Error(data.error || 'Failed to create payment');
       }
       
-      // Load Razorpay script dynamically
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      document.body.appendChild(script);
-      
-      script.onload = () => {
+      // Use Razorpay directly (the script is already loaded via RazorpayLoader)
+      if (window.Razorpay) {
         const options = {
-          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || window.RAZORPAY_KEY_ID,
+          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
           amount: data.order.amount,
           currency: "INR",
           name: "BUILDUP X",
@@ -110,12 +106,10 @@ export default function PaymentModal({ isOpen, onClose, plan, price }) {
         
         const paymentObject = new window.Razorpay(options);
         paymentObject.open();
-      };
-      
-      script.onerror = () => {
+      } else {
         setError('Failed to load payment gateway');
         setIsLoading(false);
-      };
+      }
       
     } catch (error) {
       setError(error.message);

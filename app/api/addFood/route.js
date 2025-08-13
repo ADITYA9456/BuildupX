@@ -67,13 +67,13 @@ export async function POST(request) {
     }
 
     // Check if this is using fallback data
-    const isFallback = nutritionData.food === foodString.trim() && 
+    const usingFallbackData = nutritionData.food === foodString.trim() && 
                       !nutritionData.food.includes(foodString.trim());
     
     // Return success response with nutrition data
     return NextResponse.json({
       success: true,
-      message: isFallback ? 'Food processed with estimated values' : 'Food processed successfully',
+      message: usingFallbackData ? 'Food processed with estimated values' : 'Food processed successfully',
       data: {
         _id: savedFood._id.toString(),
         food: nutritionData.food,
@@ -84,7 +84,7 @@ export async function POST(request) {
         fiber: nutritionData.fiber || '0 g',
         originalInput: foodString
       },
-      source: isFallback ? 'fallback-estimation' : 'gemini-ai'
+      source: usingFallbackData ? 'fallback-estimation' : 'gemini-ai'
     }, { status: 200 });
 
   } catch (error) {

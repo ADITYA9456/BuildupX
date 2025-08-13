@@ -8,7 +8,9 @@ const nextConfig = {
     },
     experimental: {
         optimizeCss: false,
-    }
+    },
+    // Disable font optimization to fix font manifest issues
+    optimizeFonts: false,
 };
 
 export default nextConfig;

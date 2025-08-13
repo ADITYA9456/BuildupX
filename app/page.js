@@ -16,7 +16,8 @@ const heroSlides = [
         desc: 'Unlock your potential with expert trainers, modern equipment, and a supportive community.',
         btn: 'Join Now',
         bg: '/img/bg.jpg',
-        gradient: 'from-green-500/20 to-emerald-500/20'
+        gradient: 'from-green-500/20 to-emerald-500/20',
+        link: '#membership'
     },
     {
         headline: (
@@ -27,7 +28,8 @@ const heroSlides = [
         desc: 'Every rep, every set, every drop of sweat brings you closer to your goals. Start your journey today.',
         btn: 'Start Training',
         bg: '/img/bg.jpg',
-        gradient: 'from-orange-500/20 to-red-500/20'
+        gradient: 'from-orange-500/20 to-red-500/20',
+        link: '#membership'
     },
     {
         headline: (
@@ -38,7 +40,8 @@ const heroSlides = [
         desc: 'Ignite your passion for fitness and discover the strength within you. Your transformation starts here.',
         btn: 'Get Inspired',
         bg: '/img/bg.jpg',
-        gradient: 'from-red-500/20 to-pink-500/20'
+        gradient: 'from-red-500/20 to-pink-500/20',
+        link: '/get-inspired'
     },
 ];
 
@@ -250,7 +253,7 @@ export default function Home() {
                                     {heroSlides[slide].desc}
                                 </motion.p>
                                 <motion.a
-                                    href="#trainers"
+                                    href={heroSlides[slide].link}
                                     className="inline-block bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-10 py-4 rounded-full font-bold shadow-lg transition-all duration-300 text-lg uppercase tracking-wide"
                                     whileHover={{ 
                                         scale: 1.05,

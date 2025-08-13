@@ -73,21 +73,58 @@ export default function Navbar() {
           transition={{ duration: 0.2 }}
         >
           <Link href="/">
-            <motion.span 
-              className="relative overflow-hidden bg-gradient-to-r from-green-500 via-green-400 to-green-600 text-white px-6 py-3 rounded-xl border border-green-400/50 shadow-lg cursor-pointer font-extrabold tracking-wide text-sm"
+            <motion.div
+              className="relative overflow-hidden flex items-center bg-gradient-to-r from-green-500 via-green-400 to-green-600 text-white px-4 py-3 rounded-xl border border-green-400/50 shadow-lg cursor-pointer"
               whileHover={{
                 boxShadow: "0 0 30px rgba(34, 197, 94, 0.5)",
                 scale: 1.02
               }}
             >
-              <span className="relative z-10">Buildup<span className=" text-amber-950">X</span></span>
+              {/* BUILDUP text */}
+              <span className="relative z-10 mr-1 font-extrabold text-gray-600 tracking-wide text-sm">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-gray-600 to-gray-400" style={{ letterSpacing: '1px' }}>BUILDUP</span>
+              </span>
+              
+              {/* Professional weightlifter icon */}
+              <div className="relative z-10 mx-1.5">
+                <svg width="24" height="20" viewBox="0 0 24 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  {/* Barbell plates */}
+                  <ellipse cx="3" cy="7" rx="3" ry="2" fill="#FFD700" />
+                  <ellipse cx="21" cy="7" rx="3" ry="2" fill="#FFD700" />
+                  
+                  {/* Barbell bar */}
+                  <path d="M3 7H21" stroke="#FFD700" strokeWidth="2" strokeLinecap="round" />
+                  
+                  {/* Head */}
+                  <circle cx="12" cy="7" r="3" fill="#FFD700" />
+                  
+                  {/* Body */}
+                  <path d="M12 10V13" stroke="#FFD700" strokeWidth="2" strokeLinecap="round" />
+                  
+                  {/* Curved arm - right side */}
+                  <path d="M12 11C13.5 11 15 9.5 16 9" stroke="#FFD700" strokeWidth="2" strokeLinecap="round" />
+                  
+                  {/* Curved arm - left side */}
+                  <path d="M12 11C10.5 11 9 9.5 8 9" stroke="#FFD700" strokeWidth="2" strokeLinecap="round" />
+                  
+                  {/* Legs */}
+                  <path d="M12 13C12 13 10 16 9 18" stroke="#FFD700" strokeWidth="1.5" strokeLinecap="round" />
+                  <path d="M12 13C12 13 14 16 15 18" stroke="#FFD700" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+              </div>
+              
+              {/* X text */}
+              <span className="relative z-10 ml-1 font-extrabold tracking-wide text-sm text-white">
+                X
+              </span>
+              
               {/* Animated background */}
               <motion.div
                 className="absolute inset-0 bg-gradient-to-r from-green-400 to-green-500 opacity-0"
                 whileHover={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
               />
-            </motion.span>
+            </motion.div>
           </Link>
         </motion.div>
 

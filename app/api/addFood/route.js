@@ -126,10 +126,10 @@ export async function getFoodNutritionFromGemini(foodString) {
     console.log('🤖 Fetching nutrition data from Gemini AI for:', foodString);
     
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-pro",
+      model: "gemini-1.5-pro",
       generationConfig: {
         temperature: 0.05, // Lower temperature for more deterministic responses
-        topK: 1,
+        topK: 16,
         topP: 0.9,
         maxOutputTokens: 1024,
         responseFormat: { type: "json" }, // Request JSON format explicitly

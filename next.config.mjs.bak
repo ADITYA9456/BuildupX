@@ -1,11 +1,11 @@
 /** @type {import('next').NextConfig} */
-import withPWAInit from 'next-pwa';
+import NextPWA from 'next-pwa';
 
-const withPWA = withPWAInit({
+const withPWA = NextPWA({
     dest: 'public',
     register: true,
     skipWaiting: true,
-    disable: process.env.NODE_ENV === 'development'
+    disable: false // Explicitly enable PWA in all environments
 });
 
 const nextConfig = {
